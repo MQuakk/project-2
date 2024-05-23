@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
     branches: [ main ]
@@ -9,46 +8,35 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      # Bước 1: Checkout code từ repository
       - uses: actions/checkout@v2
 
-      # Bước 2: Lấy ngày hiện tại để dùng cho cache key
+      used to cache dependencies with a timeout
       - name: Get Date
         id: get-date
-        run: echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_ENV
+        run: |
+          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+        shell: bash
 
-      # Bước 3: Cache thư mục buildozer global
       - name: Cache Buildozer global directory
         uses: actions/cache@v2
         with:
-          path: ~/.buildozer
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-global-
+          path: .buildozer_global
+          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
 
-      # Bước 4: Cache thư mục buildozer
       - uses: actions/cache@v2
         with:
           path: .buildozer
-          key: ${{ runner.os }}-buildozer-${{ env.date }}-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            ${{ runner.os }}-buildozer-
+          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
 
-      # Bước 5: Cài đặt các gói cần thiết và Buildozer
-      - name: Set up environment
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-          pip install --upgrade cython
-          pip install buildozer
-
-      # Bước 6: Build APK với Buildozer
       - name: Build with Buildozer
-        run: buildozer -v android debug
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: stable
 
-      # Bước 7: Tải tệp APK đã build lên như artifact
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: package
-          path: bin/*.apk  # Đường dẫn tới tệp APK
+          path: ${{ steps.buildozer.outputs.filename }}
