@@ -1,0 +1,50 @@
+<MainBoxLayout>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+    
+    Label:
+        text: 'Chương trình mở video'
+        font_size: '24sp'
+
+    TextInput:
+        id: path_input
+        hint_text: 'Chọn video'
+        readonly: True
+
+    Button:
+        text: 'CHỌN VIDEO'
+        on_press: app.root.choose_video(self)
+
+    TextInput:
+        id: com_port_combo
+        hint_text: 'Cổng COM'
+
+    Button:
+        text: 'Reset Cổng COM'
+        on_press: app.root.reset_com_ports(self)
+
+    TextInput:
+        id: sensor_input
+        hint_text: 'Nhập giá trị cảm biến'
+        multiline: False
+
+    Button:
+        text: 'Gửi giá trị cảm biến'
+        on_press: app.root.send_to_arduino(self)
+
+    Button:
+        text: 'Phát Video'
+        on_press: app.root.play_video(self)
+
+    Button:
+        text: 'Kết nối'
+        on_press: app.root.toggle_serial_connection(self)
+
+    Button:
+        text: 'Dừng Video'
+        on_press: app.root.stop_video(self)
+
+    Label:
+        id: invalid_sensor_label
+        color: 1, 0, 0, 1
